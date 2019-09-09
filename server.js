@@ -54,8 +54,12 @@ function validateUniqueName(req, res, next){
     })
 }
 
+// Example query with query strings: http://localhost:4001/accounts?limit=5&sortdir=desc&sortby=budget
 server.get('/accounts/', (req, res)=>{
-    db.select('*').from('accounts')
+    const limit = req.query.limit || 1000;
+    const sortby = req.query.sortby || 'id';
+    const sortdir = req.query.sortdir || 'asc'
+    db.select('*').from('accounts').orderBy(`${sortby}`, `${sortdir}`).limit(limit)
     .then(response => {
         res.status(200).json(response)
     })
@@ -83,7 +87,15 @@ server.post('/accounts/', validateAccount, validateUniqueName, (req, res)=>{
 server.delete('/accounts/:id', validateId, (req, res)=>{
     db('accounts').where({id: req.params.id}).del()
     .then(count => {
-        res.status(200).json({message: `deleted ${count} record(s)`})
+        res.status(200).json({message: `Deleted ${count} record(s)`})
+    })
+    .catch(err => { res.json(err)})
+})
+
+server.put('/accounts/:id', validateId, validateAccount, validateUniqueName, (req, res)=>{
+    db('accounts').where('id', `${req.params.id}`).update(req.body)
+    .then(count => {
+        res.status(200).json({message: `Updated ${count} record(s)`})
     })
     .catch(err => { res.json(err)})
 })
