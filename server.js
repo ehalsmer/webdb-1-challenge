@@ -80,6 +80,14 @@ server.post('/accounts/', validateAccount, validateUniqueName, (req, res)=>{
     .catch(err => { res.json(err)})
 })
 
+server.delete('/accounts/:id', validateId, (req, res)=>{
+    db('accounts').where({id: req.params.id}).del()
+    .then(count => {
+        res.status(200).json({message: `deleted ${count} record(s)`})
+    })
+    .catch(err => { res.json(err)})
+})
+
 
 
 module.exports = server;
